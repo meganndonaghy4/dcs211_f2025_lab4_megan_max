@@ -85,3 +85,69 @@ for state, row in state_stats_low.iterrows():
 
 print(table_low)
 
+# top ten counties by decreasing poverty rate 
+top_counties = arc_data.sort_values(by='poverty_rate', ascending=False).head(10)
+table_pov = PrettyTable()
+table_pov.field_names = ["State", "County", "PCI", "Poverty Rate", "Avg Unemployment"]
+
+for _, row in top_counties.iterrows(): 
+    table_pov.add_row([
+        row['state'], 
+        row['county'], 
+        f"${row['income_pc']:,.2f}",
+        f"{row['poverty_rate']:.2f}",
+        f"{row['unemp_rate_3yr']:.2f}"
+    ])
+
+print(table_pov)
+
+
+# function to print tables based on poverty rate, per capita income, or average unemployment 
+def printTableBy(dataframe: pd.DataFrame, field: str, how_many: int, title: str
+): 
+    ''' 
+    Function that prints a PrettyTable with the highest and lowest given amount of rows sorted by a given field. 
+    Parameters: 
+    - dataframe: pandas data frame 
+    - field: column name (field of interest)
+    - how_many: number of rows the user wants to include in the table
+    - title: user's title of choice for the table
+    Returns: 
+    - None
+    '''
+    cleaned_data = dataframe.dropna(subset=[field])
+    top_rows = cleaned_data.sort_values(by=field, ascending=False).head(how_many)
+    bottom_rows = cleaned_data.sort_values(by=field, ascending=True).head(how_many)
+
+    tab = PrettyTable()
+    columns = ["State", "County", "PCI", "Poverty Rate", "Avg Unemployment"]
+    table.field_names = columns
+
+    for _, row in top_rows.iterrows():
+        tab.add_row([
+        f"{row['state']:<20}",
+        f"{row['county']:<20}", 
+        f"${row['income_pc']:,.2f}",
+        f"{row['poverty_rate']:.2f}",
+        f"{row['unemp_rate_3yr']:.2f}"
+    ])  
+
+    # need to add separator row 
+
+    for _, row in bottom_rows.iterrows():
+        tab.add_row([
+        f"{row['state']:<20}",
+        f"{row['county']:<20}",
+        f"${row['income_pc']:,.2f}",
+        f"{row['poverty_rate']:.2f}",
+        f"{row['unemp_rate_3yr']:.2f}"
+    ])  
+    
+    print(title)
+    print(tab)
+
+
+printTableBy(arc_data, 'poverty_rate', how_many = 10, title = "COUNTIES BY POVERTY RATE")
+printTableBy(arc_data, 'unemp_rate_3yr', how_many = 10, title = "COUNTIES BY UNEMPLOYMENT RATE")
+printTableBy(arc_data, 'income_pc', how_many = 10, title = "COUNTIES BY PER CAPITA INCOME")
+
