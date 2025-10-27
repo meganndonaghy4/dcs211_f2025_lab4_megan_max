@@ -24,3 +24,64 @@ print(f"Standard Deviation: {std_poverty:.2f}")
 print(f"Minimum Poverty Rate: {min_poverty:.2f}%")
 print(f"Maximum Poverty Rate: {max_poverty:.2f}%")
 print("=============================================")
+
+# type of state variable 
+type(arc_data['state'])
+
+# printing number of counties per state 
+print(arc_data['state'].value_counts())
+
+# table with highest ten sum stats 
+state_stats = ( 
+    arc_data.groupby('state')
+    .agg(
+        num_counties=('state', 'count'),
+        mean_income_pc=('income_pc', 'mean'), 
+        median_income_pc=('income_pc', 'median'),
+        poverty_rate=('poverty_rate', 'mean')
+    )
+    .sort_values(by='num_counties', ascending=False)
+    .head(10)
+)
+
+table = PrettyTable()
+table.field_names = ["State", "# counties", "PCI (mean)", "PCI (median)", "Poverty Rate"]
+for state, row in state_stats.iterrows(): 
+    table.add_row([
+        state,
+        row['num_counties'],
+        f"{row['mean_income_pc']:.2f}",
+        f"{row['median_income_pc']:.2f}", 
+        f"{row['poverty_rate']:.2f}"
+    ])
+
+print(table) 
+
+# table with lowest ten sum stats (excluding DC)
+state_stats_low = ( 
+    arc_data
+    .query("state != 'District of Columbia'")
+    .groupby('state')
+    .agg(
+        num_counties=('state', 'count'),
+        mean_income_pc=('income_pc', 'mean'), 
+        median_income_pc=('income_pc', 'median'),
+        poverty_rate=('poverty_rate', 'mean')
+    )
+    .sort_values(by='num_counties', ascending=False)
+    .tail(10)
+)
+
+table_low = PrettyTable()
+table_low.field_names = ["State", "# counties", "PCI (mean)", "PCI (median)", "Poverty Rate"]
+for state, row in state_stats_low.iterrows(): 
+    table_low.add_row([
+        state,
+        row['num_counties'],
+        f"{row['mean_income_pc']:.2f}",
+        f"{row['median_income_pc']:.2f}", 
+        f"{row['poverty_rate']:.2f}"
+    ])
+
+print(table_low)
+
