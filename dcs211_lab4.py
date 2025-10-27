@@ -121,7 +121,7 @@ def printTableBy(dataframe: pd.DataFrame, field: str, how_many: int, title: str
 
     tab = PrettyTable()
     columns = ["State", "County", "PCI", "Poverty Rate", "Avg Unemployment"]
-    table.field_names = columns
+    tab.field_names = columns
 
     for _, row in top_rows.iterrows():
         tab.add_row([
