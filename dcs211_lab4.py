@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 from prettytable import PrettyTable
+import requests
 
 arc_data = pd.read_csv("county_economic_status_2024.csv", skiprows=4, skipfooter=1, engine='python', thousands=',')
 
@@ -132,7 +133,7 @@ def printTableBy(dataframe: pd.DataFrame, field: str, how_many: int, title: str
         f"{row['unemp_rate_3yr']:.2f}"
     ])  
 
-    # need to add separator row 
+    tab.add_row(['-'*20, "-"*20, "-"*10, "-"*10, "-"*10], divider= True)
 
     for _, row in bottom_rows.iterrows():
         tab.add_row([
@@ -147,7 +148,86 @@ def printTableBy(dataframe: pd.DataFrame, field: str, how_many: int, title: str
     print(tab)
 
 
-printTableBy(arc_data, 'poverty_rate', how_many = 10, title = "COUNTIES BY POVERTY RATE")
-printTableBy(arc_data, 'unemp_rate_3yr', how_many = 10, title = "COUNTIES BY UNEMPLOYMENT RATE")
-printTableBy(arc_data, 'income_pc', how_many = 10, title = "COUNTIES BY PER CAPITA INCOME")
+#printTableBy(arc_data, 'poverty_rate', how_many = 10, title = "COUNTIES BY POVERTY RATE")
+#printTableBy(arc_data, 'unemp_rate_3yr', how_many = 10, title = "COUNTIES BY UNEMPLOYMENT RATE")
+#printTableBy(arc_data, 'income_pc', how_many = 10, title = "COUNTIES BY PER CAPITA INCOME")
 
+def createByStateBarPlot(df: pd.DataFrame, field: str, filename: str, title: str, ylabel: str) -> None:
+    '''
+    Creates a per state bar plot for the given field, grouped by state and showing the mean value
+    '''
+    grouped = df.groupby('state')[field].mean().sort_values(ascending=True)
+
+    us_state_to_abbrev = {
+    "Alabama": "AL",
+    "Alaska": "AK",
+    "Arizona": "AZ",
+    "Arkansas": "AR",
+    "California": "CA",
+    "Colorado": "CO",
+    "Connecticut": "CT",
+    "Delaware": "DE",
+    "Florida": "FL",
+    "Georgia": "GA",
+    "Hawaii": "HI",
+    "Idaho": "ID",
+    "Illinois": "IL",
+    "Indiana": "IN",
+    "Iowa": "IA",
+    "Kansas": "KS",
+    "Kentucky": "KY",
+    "Louisiana": "LA",
+    "Maine": "ME",
+    "Maryland": "MD",
+    "Massachusetts": "MA",
+    "Michigan": "MI",
+    "Minnesota": "MN",
+    "Mississippi": "MS",
+    "Missouri": "MO",
+    "Montana": "MT",
+    "Nebraska": "NE",
+    "Nevada": "NV",
+    "New Hampshire": "NH",
+    "New Jersey": "NJ",
+    "New Mexico": "NM",
+    "New York": "NY",
+    "North Carolina": "NC",
+    "North Dakota": "ND",
+    "Ohio": "OH",
+    "Oklahoma": "OK",
+    "Oregon": "OR",
+    "Pennsylvania": "PA",
+    "Rhode Island": "RI",
+    "South Carolina": "SC",
+    "South Dakota": "SD",
+    "Tennessee": "TN",
+    "Texas": "TX",
+    "Utah": "UT",
+    "Vermont": "VT",
+    "Virginia": "VA",
+    "Washington": "WA",
+    "West Virginia": "WV",
+    "Wisconsin": "WI",
+    "Wyoming": "WY",
+    "District of Columbia": "DC",
+    "American Samoa": "AS",
+    "Guam": "GU",
+    "Northern Mariana Islands": "MP",
+    "Puerto Rico": "PR",
+    "United States Minor Outlying Islands": "UM",
+    "Virgin Islands, U.S.": "VI",
+}
+    abbrevs = [us_state_to_abbrev.get(s, s) for s in grouped.index]
+    grouped.index = abbrevs
+
+    plt.figure(figsize=(12, 6))
+    plt.bar(grouped.index, grouped.values)
+    plt.title(title)
+    plt.ylabel(ylabel)
+    plt.xticks(rotation=90)
+    plt.tight_layout()
+    plt.savefig(filename, dpi=300)
+
+    print(f"Saved plot to '{filename}'")
+
+createByStateBarPlot(arc_data,'unemp_rate_3yr','unemploy.png','States by Poverty Rate','Average Poverty Rate (%)')
